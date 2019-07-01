@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Consola</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+	<script src="../threadjs/Concurrent.Thread-full-20090713.js"></script>
+<style>
+	* {
+		font-family: arial;
+		--altob: 5em;
+		--anchob: 6em;
+		--alto: auto;
+		--ancho: 230px;
+		padding: 0;
+		margin: 0;
+	}
+	.container {
+		display: grid;
+		overflow: hidden;
+	/*	flex-wrap: wrap; */
+		text-align: center;
+	    grid-template-columns: repeat(auto-fit, var(--ancho));
+	    justify-content: center;
+	    grid-auto-columns: 1fr;
+	    grid-auto-rows: 1fr;
+	    grid-gap: 0.5rem;
+	    grid-auto-flow: row dense;
+	}
+	.centros {
+		padding: 1em 1em;
+		background: #ddd6d6;
+	}
+	.titulo {
+		padding-top: 0.5em;
+		padding-bottom: 0.5em;
+	}
+	.status {
+		height: var(--altob);
+		width: var(--anchob);
+		margin: auto;
+		line-height: var(--altob);
+		border-radius: 50%;
+		text-align: center;
+		border: solid 0.5px;
+		background: radial-gradient(rgba(255,0,0,0) 10%, rgba(255,0,0,1) 60%);
+		transition: background 10s ease-in-out;
+	}
+	.interruptor {
+		line-height: 2em;
+		vertical-align: middle;
+		height: 3em;
+	}
+</style>
+</head>
+<body>
+	<div style="position: relative;">
+		<h2 align="center" style="padding: 1em;">CONSOLA DE MONITOREO DE LA PLATAFORMA</h2>
+		<div align="center" style="padding: 2em;">
+			<button id="btn_encendido" style="font-size: 1.5em;" onclick="encender(this)">Encender Consola</button>
+		</div>
+	</div>
+	<div id="consola" class="container">
+		<h2 class="titulo">Consola Apagada.</h2>
+	</div>
+
+<script type="text/javascript">
+
+function cambiar() {
+lista += '<h4 class="titulo">'+datos.centros[i].nombre+'</h4>';
+
+/*
+	console.log(valor);
+	if (valor==1) {
+		console.log('entro 1');
+		document.getElementById('status_'+datos.centros[0].id).style.background = "linear-gradient(90deg, rgba(0,200,0,1) 10%, rgba(0,200,0,0) 80%)";
+		valor = 0;
+	} else {
+		console.log('entro 2');
+		document.getElementById('status_'+datos.centros[0].id).style.background = "linear-gradient(90deg, rgba(0,200,0,0) 10%, rgba(0,200,0,1) 80%)";	 
+		valor = 1;
+	}
+*/
+}
+
+function encender(obj) {
+	if (obj.innerHTML=="Encender Consola") {
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				if (this.responseText=='No') {
+					lista = '<h2 class="titulo">No hay información que mostrar.</h2>';
+					document.getElementById("consola").innerHTML = lista; 
+				} else {
+					datos = JSON.parse(this.responseText);
+					document.getElementById("consola").innerHTML = 'Cargando centros...'; 
+					lista = '';
+					if (datos.centros!=undefined) {
+						for (var i = 0; i < datos.centros.length; i++) {
+							lista += '<div id="centro_'+datos.centros[i].id+'" class="centros">';
+								Concurrent.Thread.create(cambiar);
+/*
+								lista += '<h4 class="titulo">'+datos.centros[i].nombre+'</h4>';
+								lista += '<h3 class="titulo">STATUS</h3>';
+								lista += '<div id="status_'+datos.centros[i].id+'" class="status"><b>INACTIVO</b></div>';
+								lista += '<div "class="interruptor">';
+									lista += '<a class="switch_on_off" href="" onclick="on_off('+i+',0,event)">Apagado</a>';
+									lista += '<img id="btn_'+datos.centros[i].id+'" class="interruptor" src="baseline_toggle_off_black_18dp.png" alt=""/>';
+									lista += '<a class="switch_on_off" href="" onclick="on_off('+i+',1,event)">Encendido</a>';
+								lista += '</div>';
+*/
+							lista += '</div>';
+						}
+						obj.innerHTML = "Apagar Consola";
+						document.getElementById("consola").innerHTML = lista;
+//						valor = 1;
+
+						/*for (var i = 0; i < datos.centros.length; i++) {
+							document.getElementById('status_'+datos.centros[i].id).style.background = "green";
+							document.getElementById('status_'+datos.centros[i].id).innerHTML = "<b>ACTIVO</b>";
+							document.getElementById('btn_'+datos.centros[i].id).src = "baseline_toggle_on_black_18dp.png";
+							datos.centros[i].encendido = 1;
+						 } */
+					}
+					// encender cada hilo haciendo ping y mostrando status
+					// cambiar color del circulo
+					// cambiar boton a encendido
+					// colocar animacion
+				}
+			}
+		} 
+		xmlhttp.open("GET", "buscacentros.php", true);
+		xmlhttp.send();
+	} else {
+		if (datos.centros!=undefined) {
+			for (var i = datos.centros.length -1; i >=0 ; i--) {
+				apagar(i);
+			}
+		}
+		obj.innerHTML = "Encender Consola";
+		document.getElementById("consola").innerHTML = '<h2 class="titulo">Consola Apagada.</h2>'; 
+	}
+}
+
+function on_off(orden,valor,event) {
+	event.preventDefault();
+	if (valor==1) { 
+		document.getElementById('status_'+datos.centros[orden].id).style.background = "linear-gradient(90deg, rgba(0,200,0,1) 10%, rgba(0,200,0,0) 80%)";
+		document.getElementById('status_'+datos.centros[orden].id).innerHTML = "<b>ACTIVO</b>";
+		document.getElementById('btn_'+datos.centros[orden].id).src = "baseline_toggle_on_black_18dp.png";
+		datos.centros[orden].encendido = 1;
+	} else {
+		document.getElementById('status_'+datos.centros[orden].id).style.background = "radial-gradient(rgba(255,0,0,0) 10%, rgba(255,0,0,1) 60%)";
+		document.getElementById('status_'+datos.centros[orden].id).innerHTML = "<b>INACTIVO</b>";
+		document.getElementById('btn_'+datos.centros[orden].id).src = "baseline_toggle_off_black_18dp.png";
+		datos.centros[orden].encendido = 0;
+	}
+	console.log(datos.centros[orden]);
+}
+
+
+function apagar(i) {
+	document.getElementById("consola").removeChild(document.getElementById("consola").childNodes[i]);
+}
+
+</script>
+<!--
+	<label for="">Dirección IP: </label>
+	<input id="ip" type="text" name="ip" value="192.168.1.106" />
+	<input id="parar" type="submit" onclick="parar()" value="Parar" />
+	<br/>
+	<iframe id="marco" src="" frameborder="0" height="250" width="500" onload="fmarco()"></iframe>
+
+<script>
+	function parar() {
+		encendido = false;	
+ 	}
+
+ 	function fmarco() {
+ 		document.getElementById("marco").src="log.html";
+ 	}
+</script>
+-->
+</body>
+</html>
+
+<!-- 	.status:hover {
+		background: linear-gradient(90deg, rgba(0,200,0,1) 10%, rgba(0,200,0,0) 80%);
+	}
+	}
+-->

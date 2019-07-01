@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Ping</title>
+	<link rel="stylesheet" href="">
+<!--	<script src="../threadjs/Concurrent.Thread-full-20090713.js"></script> -->
+</head>
+<body>
+	<label for="">Dirección IP: </label>
+	<input id="ip" type="text" name="ip" value="192.168.1.106" />
+	<input id="parar" type="submit" onclick="parar()" value="Parar" />
+	<br/>
+	<iframe id="marco" src="" frameborder="0" height="250" width="500" onload="fmarco()"></iframe>
+
+<script>
+	function parar() {
+		encendido = false;
+ 	}
+
+ 	function fmarco() {
+ 		document.getElementById("marco").src="log.html";
+ 	}
+</script>
+</body>
+</html>
